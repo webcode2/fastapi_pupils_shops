@@ -22,6 +22,8 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
+    id:int
+    role:int
     email: str
 
 

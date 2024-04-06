@@ -39,6 +39,7 @@ async def get_user_by_email(db: Session, email) -> User | None:
     user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Invalid Username  and Password")
+    logger.info(f"dict for user {type(user)}")
     return user
 
 
@@ -73,7 +74,8 @@ async def authenticate_user(db: Session, email: EmailStr, password: str) -> Toke
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect username or password",
         )
-    token = create_access_token(data={"id": user.id, "email": user.email}, expires_delta=timedelta(days=30, minutes=30), )
+    token = create_access_token(data={"id": user.id, "email": user.email, "role": user.role
+                                      }, expires_delta=timedelta(days=30, minutes=30), )
     return token
 
 
@@ -82,7 +84,7 @@ async def create_user(db: Session, data: UserCreate) -> User | None:
     hashed_password = get_password_hash(data.password)
     user: User = User(
         first_name=data.first_name, phone=data.phone, last_name=data.last_name, email=data.email,
-        hashed_password=hashed_password,role=data.role)
+        hashed_password=hashed_password, role=data.role)
     db.add(user)
     db.commit()
     db.refresh(user)

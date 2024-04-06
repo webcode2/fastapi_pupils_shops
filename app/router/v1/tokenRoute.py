@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends
@@ -12,23 +13,37 @@ from app.schemas.tokens import PassCode, PassCodeRead
 
 router = APIRouter(prefix="/tokens", tags=["Tokens"], dependencies=[Depends(get_db)], )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
-@router.get("/generate/token/", response_model=PassCode)
-async def generate_token(db: Session = Depends(get_db),
-                         current_user=Depends(get_current_active_user),
 
-                         ):
+@router.get("/generate/token/",)
+async def generate_token(db: Session = Depends(get_db),current_user=Depends(get_current_active_user)):
     code = generate_unique_code()
     today = datetime.today()
+    exist = db.query(Token).filter(func.date(Token.created_at) == today, Token.code==code["token"]).first()
+    if  exist :
+        return exist
 
-    while True:
-        exist = db.query(Token).filter(func.date(Token.created_at) == today, code=code)
-        if exist is not None:
-            return exist
+    new_code=Token(code=code["token"],created_at=datetime.now(),updated_at=datetime.now(),user_id=current_user.id)
+    #
+    db.add(new_code)
+    db.commit()
+    db.refresh(new_code)
+    return new_code
 
-        new_code=Token(**dict(PassCodeRead(code="",created_at="",updated_at="",owner=current_user)))
+@router.pos("/generate/token/",)
+async def generate_token(db: Session = Depends(get_db),current_user=Depends(get_current_active_user)):
+    code = generate_unique_code()
+    today = datetime.today()
+    exist = db.query(Token).filter(func.date(Token.created_at) == today, Token.code==code["token"]).first()
+    if  exist :
+        return exist
 
-        db.add(new_code)
-        db.commit()
-        db.refresh(new_code)
-        return new_code
+    new_code=Token(code=code["token"],created_at=datetime.now(),updated_at=datetime.now(),user_id=current_user.id)
+    #
+    db.add(new_code)
+    db.commit()
+    db.refresh(new_code)
+    return new_code

@@ -15,7 +15,7 @@ from fastapi.security import OAuth2PasswordBearer
 from ..schemas.tokens import TokenData
 from ..schemas.user import UserRead
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token/")
 settings = Settings()
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
-async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme), ):
+async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme) ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -31,19 +31,22 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        email: str = payload.get("sub")
+        email: str = payload.get("email")
+        logger.info(token)
         if email is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
+
     except JWTError:
         raise credentials_exception
-    user = get_user_by_email(db=db, email=email)
+    user = await get_user_by_email(db=db, email=email)
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(current_user: UserRead = Depends(get_current_user)):
-    if current_user.id == 1:
-        raise HTTPException(status_code=400, detail="Inactive user")
+async def get_current_active_user(current_user: UserRead = Depends( get_current_user)):
+
+    # if current_user.id == 1:
+    #     raise HTTPException(status_code=400, detail="Inactive user")
+    # logger.info( dict(await current_user))
     return current_user
