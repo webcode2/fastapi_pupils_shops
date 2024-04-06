@@ -9,7 +9,7 @@ from .auth import get_user, get_user_by_email
 from ..core.config import Settings
 from jose import jwt, JWTError
 from ..db.main import get_db
-from ..db.models.user import User
+from ..db.models.user import User, Role
 from fastapi.security import OAuth2PasswordBearer
 
 from ..schemas.tokens import TokenData
@@ -50,3 +50,7 @@ async def get_current_active_user(current_user: UserRead = Depends( get_current_
     #     raise HTTPException(status_code=400, detail="Inactive user")
     # logger.info( dict(await current_user))
     return current_user
+
+
+async def  is_admin(current_user:UserRead=Depends(get_current_user))->bool:
+    return current_user.role==Role.superuser
