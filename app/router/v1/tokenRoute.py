@@ -33,7 +33,7 @@ async def generate_token(db: Session = Depends(get_db),current_user=Depends(get_
     db.refresh(new_code)
     return new_code
 
-@router.pos("/generate/token/",)
+@router.post("/generate/token/",)
 async def generate_token(db: Session = Depends(get_db),current_user=Depends(get_current_active_user)):
     code = generate_unique_code()
     today = datetime.today()
