@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from ...db.models.user import User
 from ...schemas.user import UserRead
 
-router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(get_db)], )
+router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(get_db),Depends(get_current_active_user)], )
 
 
 @router.get("/", response_model=List[UserRead])

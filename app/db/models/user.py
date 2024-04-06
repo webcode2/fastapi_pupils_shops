@@ -27,7 +27,7 @@ class User(Timestamp, Base):
     role = Column(Enum(Role), default=Role.resident, nullable=False)
 
     # # Relationship with other models (optional)
-    tokens = relationship("Token", back_populates="owner")
+    tokens = relationship("Token", back_populates="owner",cascade="all, delete")
     resident_info = relationship("Resident", uselist=False, back_populates="resident")
     # user_complaint = relationship("Complaint", back_populates="complaint_owner")
 
@@ -36,7 +36,7 @@ class Token(Timestamp, Base):
     __tablename__ = "tokens"
 
     id: int = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    code: str = Column(String(5))
+    code: str = Column(String(5),index=True)
     verified: bool = Column(BOOLEAN, default=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="tokens")

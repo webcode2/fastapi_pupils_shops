@@ -43,5 +43,9 @@ class PassCode(BaseModel):
 
 class PassCodeRead(PassCode):
     id: int
+    host_id:int
+    host_name:str
     verified: bool
 
+class PassCodeValidate(BaseModel):
+    code:str
