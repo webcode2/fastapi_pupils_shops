@@ -32,14 +32,14 @@ async def generate_token(db: Session = Depends(get_db),is_admin:bool=Depends(is_
     db.add(new_code)
     db.commit()
     db.refresh(new_code)
-    return PassCodeRead(host_id=new_code.owner.id, host_name=f"{new_code.owner.first_name} {new_code.owner.last_name}",
+    return PassCodeRead(host_id=new_code.owner.id, host_name=new_code.owner.get_full_name(),
                             code=new_code.code,
                             created_at=new_code.created_at, verified=new_code.verified, id=new_code.id,
                             updated_at=new_code.updated_at)
 
 
 @router.post("/generate/token/", response_model=PassCodeRead)
-async def validate_token(data: PassCodeValidate, db: Session = Depends(get_db),
+async def varify_token(data: PassCodeValidate, db: Session = Depends(get_db),
                          current_user=Depends(get_current_active_user)):
     today = datetime.today()
     now = datetime.now()
@@ -47,7 +47,7 @@ async def validate_token(data: PassCodeValidate, db: Session = Depends(get_db),
     exist = db.query(Token).filter(Token.code == data.code).filter(Token.created_at >= twelve_hours_ago).first()
     if exist:
 
-        return PassCodeRead(host_id=exist.owner.id, host_name=f"{exist.owner.first_name} {exist.owner.last_name}",
+        return PassCodeRead(host_id=exist.owner.id, host_name=exist.owner.get_full_name(),
                             code=exist.code,
                             created_at=exist.created_at, verified=exist.verified, id=exist.id,
                             updated_at=exist.updated_at)

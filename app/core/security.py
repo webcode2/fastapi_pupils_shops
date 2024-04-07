@@ -32,25 +32,32 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("email")
-        logger.info(token)
         if email is None:
             raise credentials_exception
+        user = await get_user_by_email(db=db, email=email)
+        if user is None:
+            raise credentials_exception
+        return user
 
     except JWTError:
         raise credentials_exception
-    user = await get_user_by_email(db=db, email=email)
-    if user is None:
-        raise credentials_exception
-    return user
+
 
 
 async def get_current_active_user(current_user: UserRead = Depends( get_current_user)):
 
-    # if current_user.id == 1:
-    #     raise HTTPException(status_code=400, detail="Inactive user")
-    # logger.info( dict(await current_user))
     return current_user
 
 
 async def  is_admin(current_user:UserRead=Depends(get_current_user))->bool:
     return current_user.role==Role.superuser
+
+async def is_logged_in(curre):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("email")
+        if email is None:
+            return False
+
+    except JWTError:
+        return False

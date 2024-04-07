@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from ...core.auth import authenticate_user, create_user, recover_account
+from ...core.security import get_current_active_user
 from ...db.main import get_db
 from ...schemas.tokens import Token
 from ...schemas.user import UserCreate, UserLogin, UserRead, UserRecoverAccount, UserPassword
@@ -48,7 +49,9 @@ async def register(user: UserCreate = Body(default=None), db: Session = Depends(
 # password recovery logics
 
 @router.post("/recover-password/", )
-async def initiate_password_recovery(email: UserRecoverAccount = Body(default=None), db: Session = Depends(get_db)):
+async def initiate_password_recovery(email: UserRecoverAccount , db: Session = Depends(get_db),
+                                    ):
+
     return await recover_account(db=db, account=email)
 
 

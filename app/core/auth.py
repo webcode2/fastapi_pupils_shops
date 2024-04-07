@@ -5,6 +5,8 @@ import bcrypt
 from fastapi import HTTPException, status, Body
 from jose import JWTError, jwt
 from pydantic import EmailStr
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing_extensions import Annotated
 
@@ -83,11 +85,18 @@ async def create_user(db: Session, data: UserCreate) -> User | None:
     # logger.info(data.email)
     hashed_password = get_password_hash(data.password)
     user: User = User(
-        first_name=data.first_name, phone=data.phone, last_name=data.last_name, email=data.email,
+        first_name=data.first_name, phone=data.phone, last_name=data.last_name, email=data.email.lower(),
         hashed_password=hashed_password, role=data.role)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        exist=db.query(User).filter(User.email==data.email).first()
+        if exist:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="user with this Email Already Exist! ")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except IntegrityError as e:
+        raise HTTPException( status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{e.__dict__}",)
     return user
 
 
@@ -104,6 +113,6 @@ async def delete_user(db: Session, user_id):
 async def recover_account(db: Session, account: UserRecoverAccount):
     user = await get_user_by_email(db=db, email=account.email)
     if user is None:
-        raise HTTPException(status_code=404, detail={"message": "Email Not associated with any Account"})
+        raise HTTPException(status_code=404, detail= "Email Not associated with any Account")
     #     send Email Message
     return user

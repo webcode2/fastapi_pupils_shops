@@ -12,7 +12,7 @@ class UserBase(BaseModel):
     first_name: str = Field()
     last_name: Optional[str] = Field()
     email: EmailStr
-    phone: int = Field()
+    phone: str = Field()
     role: int = Field()
 
     class Config:
@@ -22,7 +22,7 @@ class UserBase(BaseModel):
                 "first_name": "johndoe",
                 "last_name": "Mike",
                 "email": "johndoe@example.com",
-                "phone": 8128991543
+                "phone": "08128991543"
             }
         }
 
