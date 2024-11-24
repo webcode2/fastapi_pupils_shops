@@ -1,60 +1,57 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Body
+from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ...core.auth import authenticate_user, create_user, recover_account
+from ...controllers.auth_controller import Authenticate
 from ...core.security import get_current_active_user
 from ...db.main import get_db
-from ...schemas.tokens import Token
-from ...schemas.user import UserCreate, UserLogin, UserRead, UserRecoverAccount, UserPassword
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
+from ...schemas.user import UserCreate, UserLogin, UserRead, UserPassword,Token
 
 router = APIRouter(prefix="/auth",
                    tags=["Auth"],
-                   responses={404: {"description": "Not found"}}, )
-
+                   responses={404: {"description": "Not found"}} )
 
 
 @router.post("/token/")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],db:Session=Depends(get_db)):
-    logger.info(form_data.username)
-    logger.info(form_data.password)
-    token = await authenticate_user(db=db, email=form_data.username, password=form_data.password)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+    auth: Authenticate = Authenticate(db=db)
+    token = await auth.authenticate_user(email=form_data.username, password=form_data.password, account="Staff")
     return token
 
 
+@router.post("/login/", response_model=Token)
+async def login(body: UserLogin, db: Session = Depends(get_db)):
+    auth: Authenticate = Authenticate(db=db)
 
-
-
-
-
-@router.post("/login/",response_model=Token )
-async def login(body :UserLogin , db: Session = Depends(get_db)):
-    token = await authenticate_user(db=db, email=body.email, password=body.password)
+    token = await auth.authenticate_user(email=body.email, password=body.password)
     return token
 
 
-@router.post("/register", response_model=UserRead)
+@router.post("/register/", response_model=UserRead)
 async def register(user: UserCreate = Body(default=None), db: Session = Depends(get_db)):
-    new_user = await create_user(db=db, data=user)
+    auth: Authenticate = Authenticate(db=db)
+    new_user = await auth.create_user(data=user)
     return new_user
 
 
 # password recovery logics
-
 @router.post("/recover-password/", )
-async def initiate_password_recovery(email: UserRecoverAccount , db: Session = Depends(get_db),
-                                    ):
+async def initiate_password_recovery(request:Request ,email: str, db: Session = Depends(get_db),    ):
+    auth: Authenticate = Authenticate(db=db)
+    return await auth.recover_account( origin=request.url, email=email)
 
-    return await recover_account(db=db, account=email)
+
+@router.post("/recover-account/{token}/")
+async def reset_password(token,  password: UserPassword = Body(default=None)):
+    return {"email": token,  **dict(password)}
 
 
-@router.post("/recover-account/{email}/{last_login}")
-async def reset_password(email, last_login, password: UserPassword = Body(default=None)):
-    return {"email": email, "last_login": last_login, **dict(password)}
+@router.post("/change_password")
+async def change_password(old_password:UserPassword=Body(default=None),db:Session=Depends(get_db),current_user:UserRead=Depends(get_current_active_user)):
+    auth:Authenticate=Authenticate(db=db)
+    auth.change_password(user_id=current_user.id)
+    
+    

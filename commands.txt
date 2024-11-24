@@ -1,0 +1,11 @@
+### ACTIVATING PYTHON ENVIRONMENT
+### WINDOWS
+sourece .venv/Scripts/activate
+
+### ALEMBIC COMMANDS
+alembic revision --autogenerate 
+alembic upgrade head
+
+### FASTAPI
+uvicorn app.main:app --reload
+

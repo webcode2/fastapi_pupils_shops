@@ -1,34 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 
-from ...core.auth import get_user_by_email, get_user, delete_user
+from ...controllers.auth_controller import Authenticate
+from ...controllers.profile_controller import Profile
 from ...core.security import get_current_user, get_current_active_user
 from ...db.main import get_db
 from typing import List
 from sqlalchemy.orm import Session
 
-from ...db.models.user import User
+from ...db.models.StaffModel import Staff
 from ...schemas.user import UserRead
 
-router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(get_db),Depends(get_current_active_user)], )
+router = APIRouter(prefix="/users", tags=["Users"],dependencies=[Depends(get_current_user)])
 
 
-@router.get("/", response_model=List[UserRead])
-async def get_all_user(
-        # current_user=Depends(get_current_active_user),
-        db: Session = Depends(get_db),
-):
-    # if not current_user:
-    #     HTTPException(status_code=404)
-    return db.query(User).all()
-
-
-@router.get("/{_id}", response_model=UserRead)
-async def get_single_user_by_id(_id: str, db: Session = Depends(get_db)):
-    user = await get_user(_id=_id, db=db)
+@router.get("/profile")
+async def get_all_user(user=Depends(get_current_user)):   
     return user
 
 
-@router.delete("/{_id}", )
+@router.get("/profile/{_id}")
+async def get_single_user_by_id(_id: int, db: Session = Depends(get_db), ):
+    # TODO change the "_id" to be current user id decoded and verified from JWT
+    profile=Profile(db,user_id=_id)
+    user = await profile.user_lookup(lookup_id=_id)
+    return user
+
+
+@router.delete("/profile/{_id}", )
 async def delete_user_by_id(_id, db: Session = Depends(get_db)):
-    await delete_user(db, _id)
+    auth = Authenticate(db)
+    await auth.delete_user(user_id=_id)
+
     return {"message": "user Delete", "status": 1}
+ 

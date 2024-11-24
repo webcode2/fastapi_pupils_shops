@@ -4,6 +4,9 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
+class Token(BaseModel):
+    token_type:str
+    access_token:str
 class UserPassword(BaseModel):
     password: str = Field(min_length=8)
 
@@ -13,10 +16,9 @@ class UserBase(BaseModel):
     last_name: Optional[str] = Field()
     email: EmailStr
     phone: str = Field()
-    role: int = Field()
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "first_name": "johndoe",
