@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -46,3 +47,18 @@ class UserLogin(BaseModel):
 
 class UserRecoverAccount(BaseModel):
     email: EmailStr = Field()
+
+
+
+# class ProfileSchema(BaseModel):
+#     is_suspended: bool
+#     updated_at: datetime
+#     other_name: Optional[str]
+#     email: str
+#     id:int
+#     is_activated: bool
+#     created_at:datetime 
+#     first_name:str
+#     last_name: str
+#     phone: str
+#     shop: any

@@ -43,6 +43,24 @@ class EmailService():
 
         return num_sent
             
+    async def send_message(self,message:EmailMessage):
+        
+        # Create Resend email data
+        email_data = {
+            "from": message.from_email,"to": message.to,"subject":message.subject,"text": message.body,"html": message.html_body
+            # Add any other Resend-specific options here
+        }
+        try:              
+            # Send the email using Resend
+            response = await self.client.Emails.send(email_data)
+        except Exception as e:
+            if self.fail_silently:
+                pass
+            else:
+                raise e
+
+        return 
+        
             
             
             

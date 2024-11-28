@@ -22,6 +22,10 @@ async def connect(sid, env,auth):
     user =await get_current_user(env.get("HTTP_AUTH"),socket=True)    
     add_new_user({user["email"]:sid})
     print(len(online))
+
+@sio.on("group")
+async def group_message(sid,env):
+    pass; 
     
     
 @sio.on("DM")

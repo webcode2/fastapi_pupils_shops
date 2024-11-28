@@ -13,22 +13,14 @@ credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Access Denied",
         headers={"WWW-Authenticate": "Bearer"},
-    )
-
-
-        
+    )     
     
-    
-    
-    
-
 
 async def create_post(db: Session, post: PostCreate):
     db_post = Post(content=post.content)
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
-    
     for media in post.media:
         db_media = Media(
             post_id=db_post.id, 
@@ -36,12 +28,12 @@ async def create_post(db: Session, post: PostCreate):
             file_path=media.file_path
         )
         db.add(db_media)
-    
     db.commit()
     return db_post
 
 async def get_posts(db: Session):
     return db.query(Post).all()
+
 
 
 async def get_post(db: Session,post_id:int):
@@ -64,13 +56,8 @@ async def delete_post(db:Session,post_id:int):
         return  HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="resources not Found",
-        
     )
 
-
-        
-    
-        
     db.delete(exist_post) 
     db.commit()
     return  {"status":200,"message":"DELETED"}

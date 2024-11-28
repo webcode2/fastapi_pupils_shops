@@ -1,9 +1,7 @@
-from sqlalchemy import Column, String, BOOLEAN, Integer, ForeignKey,TEXT,JSON 
+from sqlalchemy import Column, String,  Integer, ForeignKey,TEXT,JSON 
 from sqlalchemy.orm import Relationship
-
+from app.db.models.mixin import Timestamp
 from app.db.main import Base
-from app.db.models.mixin import Timestamp,UserBasic
-from app.db.models.userModel import User, UserResidentInfo
 
 
 
@@ -19,9 +17,9 @@ class Shop(Timestamp, Base):
     Business_reg_no: str = Column(String(128), nullable=True,)
    
     
-    user = Relationship("User", uselist=False)
+    owner = Relationship("User", uselist=False)
     user_id = Column(Integer, ForeignKey("users.id") ,unique=True)
-    
+    shop_status=Relationship("ShopActivate",back_populates="shop_")
     pups=Relationship("Pups",back_populates="shop")
     
     
@@ -32,9 +30,10 @@ class Pups(Timestamp ,Base):
     text:str=Column(TEXT ,nullable=True)
     img_urls:str=Column(JSON)
     
-    shop_id:int=Column(Integer,ForeignKey("shops.id"))
-    shop=Relationship("Shop",back_populates="pups",uselist=False)
     breed_id:int=Column(Integer,ForeignKey("breeds.id"))
+    shop_id:int=Column(Integer,ForeignKey("shops.id"))
+    
+    shop=Relationship("Shop",back_populates="pups",uselist=False, cascade="all, delete")
     breed=Relationship("Breed",uselist=False, back_populates="pups")
     categories=Relationship("Category",secondary="pups_category")
     

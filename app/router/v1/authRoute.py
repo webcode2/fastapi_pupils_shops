@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ...controllers.auth_controller import Authenticate
+from ...controllers.auth_controller import Authenticate,activateAccountWithCode
 from ...core.security import get_current_active_user
 from ...db.main import get_db
 from ...schemas.user import UserCreate, UserLogin, UserRead, UserPassword,Token
@@ -55,3 +55,9 @@ async def change_password(old_password:UserPassword=Body(default=None),db:Sessio
     auth.change_password(user_id=current_user.id)
     
     
+    
+@router.post("/activate")
+async def acctivate_account(user=Body(default=None),db:Session=Depends(get_db)):
+    data= await activateAccountWithCode(code=user["code"],db=db,user_id=user["user_id"])
+    # return data
+    return (data)

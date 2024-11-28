@@ -2,13 +2,16 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
+
 class MediaCreate(BaseModel):
     media_type: str  # "image" or "video"
     file_path: str
 
+
 class PostCreate(BaseModel):
     content: Optional[str] = None
     media: Optional[List[MediaCreate]] = []
+
 
 class Media(BaseModel):
     id: int
@@ -18,6 +21,7 @@ class Media(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class Post(BaseModel):
     id: int

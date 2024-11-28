@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cbdb85b11284
+Revision ID: d58d17d48044
 Revises: 
-Create Date: 2024-11-23 20:41:47.392744
+Create Date: 2024-11-25 19:12:27.909638
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cbdb85b11284'
+revision: str = 'd58d17d48044'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -48,6 +48,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_staff_id'), 'staff', ['id'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('is_activated', sa.BOOLEAN(), nullable=True),
+    sa.Column('is_suspended', sa.BOOLEAN(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('first_name', sa.String(length=100), nullable=False),
@@ -59,6 +61,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_table('Followers',
+    sa.Column('follower_id', sa.Integer(), nullable=False),
+    sa.Column('int', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['follower_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['int'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('follower_id', 'int')
+    )
     op.create_table('roles',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
@@ -98,17 +109,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_staff_resident_id'), 'staff_resident', ['id'], unique=False)
-    op.create_table('users_acccount_status',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('status', sa.BOOLEAN(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
-    )
-    op.create_index(op.f('ix_users_acccount_status_id'), 'users_acccount_status', ['id'], unique=False)
     op.create_table('users_resident_info',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('house_no', sa.Integer(), nullable=True),
@@ -137,8 +137,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('text', sa.TEXT(), nullable=True),
     sa.Column('img_urls', sa.JSON(), nullable=True),
-    sa.Column('shop_id', sa.Integer(), nullable=True),
     sa.Column('breed_id', sa.Integer(), nullable=True),
+    sa.Column('shop_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['breed_id'], ['breeds.id'], ),
@@ -197,14 +197,13 @@ def downgrade() -> None:
     op.drop_table('verification_code')
     op.drop_index(op.f('ix_users_resident_info_id'), table_name='users_resident_info')
     op.drop_table('users_resident_info')
-    op.drop_index(op.f('ix_users_acccount_status_id'), table_name='users_acccount_status')
-    op.drop_table('users_acccount_status')
     op.drop_index(op.f('ix_staff_resident_id'), table_name='staff_resident')
     op.drop_table('staff_resident')
     op.drop_index(op.f('ix_shops_id'), table_name='shops')
     op.drop_table('shops')
     op.drop_index(op.f('ix_roles_id'), table_name='roles')
     op.drop_table('roles')
+    op.drop_table('Followers')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
     op.drop_index(op.f('ix_staff_id'), table_name='staff')

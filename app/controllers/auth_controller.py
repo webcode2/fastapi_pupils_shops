@@ -12,10 +12,11 @@ from sqlalchemy.orm import Session
 
 from ..core.config import Settings
 from ..db.models.StaffModel import Staff
-from ..db.models.ShopModel import User
+from ..db.models.userModel import User
 from ..schemas.user import UserCreate, UserLogin, UserRecoverAccount, UserRead,Token
 from ..schemas.schemas import EmailMessage
 from ..emailService import EmailService
+from ..db.models.accounts_activation import VerificationCode
 
 def encode_base64_url_safe(data:str):
    return urlParse.quote_from_bytes(base64.urlsafe_b64encode(data.encode("utf-8")), safe="")
@@ -81,12 +82,14 @@ class Authenticate:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Incorrect username or password")
-       
+        if not user.is_activated:
+            raise HTTPException(detail="Un-Authorized Accoutm not Verified",status_code=401)
+            
         if not verify_password(password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Incorrect username or password")
-            
+        
         token = create_access_token(data={"id": user.id, "email": user.email,  "account":account                                         }, expires_delta=timedelta(days=account==30 if account=="user" else 0.5), )
         return token
 
@@ -127,8 +130,16 @@ class Authenticate:
                 self.db.commit()
                 self.db.refresh(user)
             except IntegrityError as e:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail=f"{e.__dict__}", )
+                # TODO rewrie it to be specific
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"{e.__dict__}")
+            mail=EmailService()
+            await mail.send_message(
+                EmailMessage(body="",
+                             to=user.email,
+                             from_email=Settings.SUPPORT_FROM_EMAIL,
+                             html_body="",
+                             subject="Account Activation - Verification Code"
+                             ))
             return user
 
     async def delete_user(self, user_id,account:str="user"):
@@ -172,5 +183,17 @@ class Authenticate:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="forbidden")
         
         
+async def activateAccountWithCode(code:int,db:Session,user_id:int):
+    # VerificationCode.created_at>timedelta(datetime.now()) 
+    data:VerificationCode=db.query(VerificationCode).filter(VerificationCode.code==code,VerificationCode.user_id==user_id,VerificationCode.is_used==False).first()
+    if data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Wrong Code or Token must have Expired")
+    data.is_used=True
+    data.user_code.is_activated=True
+    db.commit()
+    db.refresh(data)
+    return {"status":status.HTTP_202_ACCEPTED,"details":"Account Activated!!!"}
+    
+    
         
             

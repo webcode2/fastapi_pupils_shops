@@ -8,14 +8,7 @@ from app.db.models.ShopModel import Shop
 
 
 
-class userActivate(Timestamp, Base):
-    __tablename__ = "users_acccount_status"  
-    id: int = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    status:bool=Column(BOOLEAN, default=False)
-    
-    user_id:int=Column(Integer,ForeignKey("users.id"),unique=True)
-    user=Relationship("User",back_populates="status",uselist=False)
-    
+
 
 class ShopActivate(Timestamp, Base):
     __tablename__ = "shop_acccount_status"  
@@ -25,18 +18,17 @@ class ShopActivate(Timestamp, Base):
     is_suspended: bool = Column(BOOLEAN, default=False)         
     
     shop_id:int=Column(Integer,ForeignKey("shops.id"),unique=True)
-    shop=Relationship("Shop",back_populates="status     ",uselist=False)
+    shop_=Relationship("Shop",back_populates="shop_status",uselist=False)
 
 
 
 class VerificationCode(Timestamp,Base):
     __tablename__="verification_code"
     id: int = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    code:int=Column(Integer,index=True)
-    
+    code:int=Column(Integer,index=True)    
     user_id:int=Column(Integer,ForeignKey("users.id"),unique=True)
-    user=Relationship("User",back_populates="status",uselist=False)
-    
+    user_code=Relationship("User",back_populates="user_verification_code",uselist=False)
     is_used:bool=  Column(BOOLEAN, default=False)
+
 
         

@@ -10,6 +10,8 @@ class Post(Base):
     content = Column(Text, nullable=True)  # For text posts
     created_at = Column(DateTime, server_default=func.now())
     media = relationship("Media", back_populates="post")  # Relationship to Media table
+    author_id = Column(Integer, ForeignKey("users.id") ,unique=True)
+    author=relationship("User",back_populates="posts")
 
 class Media(Base):
     __tablename__ = "media"
