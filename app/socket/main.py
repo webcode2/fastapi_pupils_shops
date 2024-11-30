@@ -1,4 +1,3 @@
-import json
 import socketio
 from typing  import List
 from ..core.security import get_current_user

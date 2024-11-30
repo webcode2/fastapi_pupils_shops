@@ -1,4 +1,3 @@
-import socketio
 from fastapi import Depends, FastAPI
 from .socket.main import socket_app
 
