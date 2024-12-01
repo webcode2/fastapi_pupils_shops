@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 7bf9bfda8eee
+Revision ID: c35755dcd6e3
 Revises: 
-Create Date: 2024-12-01 12:26:23.270865
+Create Date: 2024-12-02 00:45:16.241514
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7bf9bfda8eee'
+revision: str = 'c35755dcd6e3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -63,12 +63,12 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('Followings',
     sa.Column('follower_id', sa.Integer(), nullable=False),
-    sa.Column('int', sa.Integer(), nullable=False),
+    sa.Column('following_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['follower_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['int'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('follower_id', 'int')
+    sa.ForeignKeyConstraint(['following_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('follower_id', 'following_id')
     )
     op.create_table('roles',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),

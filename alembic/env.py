@@ -1,13 +1,14 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from app.db.main import Base
-from ..app.db.models.userModel import *
-from ..app.db.models.StaffModel import *
-from ..app.db.models.ShopModel import *
-from ..app.db.models.accounts_activation import *
+from app.db.models.userModel import User, UserResidentInfo
+from app.db.models.StaffModel import *
+from app.db.models.ShopModel import *
+from app.db.models.accounts_activation import *
 # Complaint,Resident
 
 from alembic import context
@@ -16,6 +17,7 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
+config.set_main_option("sqlalchemy.url",os.getenv("DATABASE_CONNECTION_STRING"))
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
