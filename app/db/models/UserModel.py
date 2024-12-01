@@ -31,7 +31,7 @@ class UserResidentInfo(Base):
 
 class Following(Timestamp,Base):
     __tablename__="Followings"
-    follower_id=int=Column(Integer,ForeignKey("users.id"),primary_key=True,nullable=False)
-    following_id=int=Column(Integer,ForeignKey("users.id"),primary_key=True,nullable=False)
+    follower_id:int=Column(Integer,ForeignKey("users.id"),primary_key=True,nullable=False)
+    following_id:int=Column(Integer,ForeignKey("users.id"),primary_key=True,nullable=False)
     
         
