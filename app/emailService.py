@@ -52,7 +52,7 @@ class EmailService():
         }
         try:              
             # Send the email using Resend
-            response = await self.client.Emails.send(email_data)
+            response =  self.client.Emails.send(email_data)
         except Exception as e:
             if self.fail_silently:
                 pass

@@ -17,6 +17,7 @@ from ..schemas.user import UserCreate, UserLogin, UserRecoverAccount, UserRead,T
 from ..schemas.schemas import EmailMessage
 from ..emailService import EmailService
 from ..db.models.accounts_activation import VerificationCode
+from  app.htmlEmails import acct_activation_code ,password_reset_request,password_reset_success,password_reset_token
 
 def encode_base64_url_safe(data:str):
    return urlParse.quote_from_bytes(base64.urlsafe_b64encode(data.encode("utf-8")), safe="")
@@ -137,9 +138,10 @@ class Authenticate:
                 EmailMessage(body="",
                              to=user.email,
                              from_email=Settings.SUPPORT_FROM_EMAIL,
-                             html_body="",
+                             html_body=acct_activation_code.html_content(user=user.first_name,code="3453"),
                              subject="Account Activation - Verification Code"
                              ))
+           
             return user
 
     async def delete_user(self, user_id,account:str="user"):
