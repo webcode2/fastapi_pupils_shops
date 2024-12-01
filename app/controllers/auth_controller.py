@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ..core.config import Settings
 from ..db.models.StaffModel import Staff
-from app.db.models.userModel import User
+from ..db.models.userModel import User
 from ..schemas.user import UserCreate, UserLogin, UserRecoverAccount, UserRead,Token
 from ..schemas.schemas import EmailMessage
 from ..emailService import EmailService

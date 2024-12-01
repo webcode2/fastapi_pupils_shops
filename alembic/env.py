@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from app.db.main import Base
-from app.db.models.userModel import User, UserResidentInfo
+from app.db.models.userModel import *
 from app.db.models.StaffModel import *
 from app.db.models.ShopModel import *
 from app.db.models.accounts_activation import *
