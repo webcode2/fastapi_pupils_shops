@@ -12,12 +12,12 @@ from sqlalchemy.orm import Session
 
 from ..core.config import Settings
 from ..db.models.StaffModel import Staff
-from ..db.models.userModel import User
 from ..schemas.user import UserCreate, UserLogin, UserRecoverAccount, UserRead,Token
 from ..schemas.schemas import EmailMessage
 from ..emailService import EmailService
 from ..db.models.accounts_activation import VerificationCode
 from  app.htmlEmails import acct_activation_code ,password_reset_request,password_reset_success,password_reset_token
+from ..db.models.userModel import User
 
 def encode_base64_url_safe(data:str):
    return urlParse.quote_from_bytes(base64.urlsafe_b64encode(data.encode("utf-8")), safe="")
